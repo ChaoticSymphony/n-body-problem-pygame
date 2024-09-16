@@ -3,8 +3,12 @@ import math
 import numpy as np
 
 a = 100
-vel = 1
+vel = 0.5
 
+red = (193, 81, 81)
+cyan = (85, 209, 209)
+blue = (85, 100, 209)
+white = (255, 255, 255)
 pygame.init()
 screen = pygame.display.set_mode((1500, 800))
 pygame.display.set_caption("Solar System")
@@ -22,10 +26,21 @@ class Body:
         self.orbit = []
 
     def draw_orbit(self, screen, offset_x, offset_y):
-        # Draw the orbit with an offset
         if len(self.orbit) > 1:
-            adjusted_orbit = [(x + offset_x, y + offset_y) for x, y in self.orbit]
-            pygame.draw.lines(screen, self.color, False, adjusted_orbit, 1)
+            # Adjust the thickness of the orbit trail based on the distance from the current position
+            max_thickness_distance = 20 # Distance after which the thickness should taper to 1px
+            for i in range(1, len(self.orbit)):
+                start_pos = (self.orbit[i - 1][0] + offset_x, self.orbit[i - 1][1] + offset_y)
+                end_pos = (self.orbit[i][0] + offset_x, self.orbit[i][1] + offset_y)
+                
+                if i < max_thickness_distance:
+                    thickness = 2  # Points halfway between recent and older have 2px thickness
+                    if i < max_thickness_distance / 2:
+                        thickness = 1 # Recent points have 1px thickness
+                else:
+                    thickness = 3  # Recent points taper to 3px thickness
+
+                pygame.draw.line(screen, self.color, start_pos, end_pos, thickness)
 
     def draw_planet(self, screen, offset_x, offset_y):
         # Draw the body itself with an offset
@@ -47,7 +62,7 @@ class Body:
         self.x += self.vx
         self.y += self.vy
         self.orbit.append((self.x, self.y))
-        if len(self.orbit) > 1200:  # Keep the orbit list from growing indefinitely
+        if len(self.orbit) > 200:  # Keep the orbit list from growing indefinitely
             self.orbit.pop(0)
 
     def interact_with(self, other):
@@ -64,9 +79,10 @@ dragging = False
 last_mouse_pos = None
 
 bodies = [
-    Body(mass=a, color=(193, 81, 81), x=750, y=400, vx=-0.5, vy=-0.5),
-    Body(mass=a, color=(85, 209, 209), x=600, y=400, vx=0.5, vy=0.5),
-    Body(mass=5, color=(85, 100, 209), x=900, y=400, vx=-0., vy=0.),
+    Body(mass=a, color=red, x=750, y=400, vx=-0.93240737, vy=-0.86473142),
+    Body(mass=a, color=cyan, x=750-97, y=400+24.323, vx=0.466203685, vy=0.43236573),
+    Body(mass=a, color=blue, x=750+97, y=400-24.323, vx=0.466203685, vy=0.43236573),
+    #Body(mass=0.0001, color=white, x=750+150, y=400-100, vx=0.7, vy=1.5),
 ]
 
 while running:
