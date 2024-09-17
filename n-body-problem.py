@@ -2,7 +2,7 @@ import pygame
 import math
 import numpy as np
 
-a = 100
+a = 90
 vel = 0.5
 
 red = (193, 81, 81)
@@ -43,7 +43,25 @@ class Body:
                 pygame.draw.line(screen, self.color, start_pos, end_pos, thickness)
 
     def draw_planet(self, screen, offset_x, offset_y):
-        # Draw the body itself with an offset
+        # Create a surface with transparency to draw the glow
+        glow_surface = pygame.Surface((100, 100), pygame.SRCALPHA)
+
+        # Define maximum radius for the glow
+        max_radius = 36  
+        steps = 36  # Number of concentric circles for the gradient glow
+
+        for i in range(steps):
+            # Calculate radius and alpha (inverted transparency: brighter in center, fading outward)
+            radius = max_radius - (i * max_radius // steps)  # Inner circles have smaller radius
+            alpha = 0 + (i * 100 // steps)  # Inner circles are more opaque, outer ones more transparent
+
+            # Draw the circle with increasing transparency toward the outer edges
+            pygame.draw.circle(glow_surface, (225, 222, 222, alpha), (50, 50), radius)
+
+        # Blit the glow surface onto the screen, centering it around the planet
+        screen.blit(glow_surface, (int(self.x + offset_x - 50), int(self.y + offset_y - 50)))
+
+        # Draw the planet 
         pygame.draw.circle(screen, self.color, (int(self.x + offset_x), int(self.y + offset_y)), 9)
 
     def accelerate_due_to_gravity(self, other):
@@ -62,7 +80,7 @@ class Body:
         self.x += self.vx
         self.y += self.vy
         self.orbit.append((self.x, self.y))
-        if len(self.orbit) > 200:  # Keep the orbit list from growing indefinitely
+        if len(self.orbit) > 1000:  # Keep the orbit list from growing indefinitely
             self.orbit.pop(0)
 
     def interact_with(self, other):
@@ -82,7 +100,6 @@ bodies = [
     Body(mass=a, color=red, x=750, y=400, vx=-0.93240737, vy=-0.86473142),
     Body(mass=a, color=cyan, x=750-97, y=400+24.323, vx=0.466203685, vy=0.43236573),
     Body(mass=a, color=blue, x=750+97, y=400-24.323, vx=0.466203685, vy=0.43236573),
-    #Body(mass=0.0001, color=white, x=750+150, y=400-100, vx=0.7, vy=1.5),
 ]
 
 while running:
