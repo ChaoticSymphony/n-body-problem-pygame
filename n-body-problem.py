@@ -2,7 +2,7 @@ import pygame
 import math
 import numpy as np
 
-a = 90
+a = 100
 vel = 0.5
 
 red = (193, 81, 81)
@@ -47,22 +47,27 @@ class Body:
         glow_surface = pygame.Surface((100, 100), pygame.SRCALPHA)
 
         # Define maximum radius for the glow
-        max_radius = 36  
-        steps = 36  # Number of concentric circles for the gradient glow
+        r = 40
+        max_radius = r  
+        steps = r  # Number of concentric circles for the gradient glow
 
         for i in range(steps):
             # Calculate radius and alpha (inverted transparency: brighter in center, fading outward)
             radius = max_radius - (i * max_radius // steps)  # Inner circles have smaller radius
-            alpha = 0 + (i * 100 // steps)  # Inner circles are more opaque, outer ones more transparent
+            alpha = 0 + (i * 150 // steps)  # Inner circles are more opaque, outer ones more transparent
+
+            # Get the color of the planet and add transparency for the glow
+            glow_color = (self.color[0], self.color[1], self.color[2], alpha)
 
             # Draw the circle with increasing transparency toward the outer edges
-            pygame.draw.circle(glow_surface, (225, 222, 222, alpha), (50, 50), radius)
+            pygame.draw.circle(glow_surface, glow_color, (50, 50), radius)
 
         # Blit the glow surface onto the screen, centering it around the planet
         screen.blit(glow_surface, (int(self.x + offset_x - 50), int(self.y + offset_y - 50)))
 
-        # Draw the planet 
+        # Draw the planet itself
         pygame.draw.circle(screen, self.color, (int(self.x + offset_x), int(self.y + offset_y)), 9)
+
 
     def accelerate_due_to_gravity(self, other):
         dx = other.x - self.x
@@ -80,7 +85,7 @@ class Body:
         self.x += self.vx
         self.y += self.vy
         self.orbit.append((self.x, self.y))
-        if len(self.orbit) > 1000:  # Keep the orbit list from growing indefinitely
+        if len(self.orbit) > 200:  # Keep the orbit list from growing indefinitely
             self.orbit.pop(0)
 
     def interact_with(self, other):
